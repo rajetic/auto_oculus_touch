@@ -25,6 +25,53 @@ ovrVolUp     := 0x00400000
 ovrVolDown   := 0x00800000
 ovrHome      := 0x01000000
 
+; Capacitive touch sensors
+ovrTouch_A              := 0x00000001
+ovrTouch_B              := 0x00000002
+ovrTouch_RThumb         := 0x00000004
+ovrTouch_RThumbRest     := 0x00000008
+ovrTouch_RIndexTrigger  := 0x00000010
+ovrTouch_X              := 0x00000100
+ovrTouch_Y              := 0x00000200
+ovrTouch_LThumb         := 0x00000400
+ovrTouch_LThumbRest     := 0x00000800
+ovrTouch_LIndexTrigger  := 0x00001000
+
+; Capacitive touch gestures
+ovrTouch_RIndexPointing := 0x00000020
+ovrTouch_RThumbUp       := 0x00000040
+ovrTouch_LIndexPointing := 0x00002000
+ovrTouch_LThumbUp       := 0x00004000
+
+; Controller types for vibration
+ovrControllerType_LTouch := 0x0001
+ovrControllerType_RTouch := 0x0002
+ovrControllerType_XBox   := 0x0010
+
+; Misc defines
+LeftHand  := 0
+RightHand := 1
+IndexTrigger := 0
+HandTrigger  := 1
+XAxis := 0
+YAxis := 1
+
+
+GetTrigger(hand, trigger)
+{
+	return DllCall("auto_oculus_touch\getTrigger", "Int", hand, "Int", trigger, "Float")
+}
+
+GetThumbStick(hand, axis)
+{
+	return DllCall("auto_oculus_touch\getThumbStick", "Int", hand, "Int", axis, "Float")
+}
+
+Vibrate(controller, frequency, amplitude)
+{
+	DllCall("auto_oculus_touch\setVibration", "UInt", controller, "Float", frequency, "Float", amplitude)
+}
+
 ; Grab the library.	
 hModule := DllCall("LoadLibrary", "Str", "auto_oculus_touch.dll", "Ptr")
 
@@ -40,14 +87,14 @@ Loop {
 	DllCall("auto_oculus_touch\poll")
 
 	; Get the various analog values. Triggers are 0.0-1.0, thumbsticks are -1.0-1.0
-	leftIndexTrigger  :=DllCall("auto_oculus_touch\getTrigger","Int",0,"Int",0,"Float")
-	leftHandTrigger   :=DllCall("auto_oculus_touch\getTrigger","Int",0,"Int",1,"Float")
-	rightIndexTrigger :=DllCall("auto_oculus_touch\getTrigger","Int",1,"Int",0,"Float")
-	rightHandTrigger  :=DllCall("auto_oculus_touch\getTrigger","Int",1,"Int",1,"Float")
-	leftX             :=DllCall("auto_oculus_touch\getThumbStick","Int",0,"Int",0,"Float")
-	leftY             :=DllCall("auto_oculus_touch\getThumbStick","Int",0,"Int",1,"Float")
-	rightX            :=DllCall("auto_oculus_touch\getThumbStick","Int",1,"Int",0,"Float")
-	rightY            :=DllCall("auto_oculus_touch\getThumbStick","Int",1,"Int",1,"Float")
+	leftIndexTrigger  := GetTrigger(LeftHand,  IndexTrigger)
+	leftHandTrigger   := GetTrigger(LeftHand,  HandTrigger)
+	rightIndexTrigger := GetTrigger(RightHand, IndexTrigger)
+	rightHandTrigger  := GetTrigger(RightHand, HandTrigger)
+	leftX             := GetThumbStick(LeftHand, XAxis)
+	leftY             := GetThumbStick(LeftHand, YAxis)
+	rightX            := GetThumbStick(RightHand, XAxis)
+	rightY            := GetThumbStick(RightHand, YAxis)
 
 	; Get button states. 
 	; Down is the current state. If you test with this, you get a key every poll it is down. Repeating.
@@ -56,6 +103,9 @@ Loop {
 	down     := DllCall("auto_oculus_touch\getButtonsDown")
 	pressed  := DllCall("auto_oculus_touch\getButtonsPressed")
 	released := DllCall("auto_oculus_touch\getButtonsReleased")
+	touchDown     := DllCall("auto_oculus_touch\getTouchDown")
+	touchPressed  := DllCall("auto_oculus_touch\getTouchPressed")
+	touchReleased := DllCall("auto_oculus_touch\getTouchReleased")
 
 	; Now to do something with them.
 	
@@ -80,9 +130,9 @@ Loop {
 		Send, {Media_Next}
 	if released & ovrUp
 		Send, {Media_Prev}
-
-	oldTrigger := rightIndexTrigger
 	
-	Sleep, 0
+	oldTrigger := rightIndexTrigger
+
+	Sleep, 10
 }
 

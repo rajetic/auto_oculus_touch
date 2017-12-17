@@ -47,6 +47,14 @@ extern "C"
 		}
 	}
 	
+	__declspec(dllexport) void setVibration(unsigned int controller, float frequency, float amplitude)
+	{
+		if (g_HMD)
+		{
+			ovr_SetControllerVibration(g_HMD, (ovrControllerType)controller, frequency, amplitude);
+		}
+	}
+
 	__declspec(dllexport) float getTrigger(int controller, int trigger)
 	{
 		if (g_HMD)
@@ -106,7 +114,32 @@ extern "C"
 		return 0;
 	}
 
+	__declspec(dllexport) float getTouchDown()
+	{
+		if (g_HMD)
+		{
+			return g_touchState.Touches;
+		}
+		return 0;
+	}
 
+	__declspec(dllexport) float getTouchPressed()
+	{
+		if (g_HMD)
+		{
+			return g_touchState.Touches & ~g_touchStateLast.Touches;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) float getTouchReleased()
+	{
+		if (g_HMD)
+		{
+			return ~g_touchState.Touches & g_touchStateLast.Touches;
+		}
+		return 0;
+	}
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule,	DWORD  ul_reason_for_call,	LPVOID lpReserved)
