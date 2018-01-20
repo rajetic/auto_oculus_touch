@@ -15,7 +15,7 @@ You must have AutoHotKey installed. It is available from https://autohotkey.com
 Change History
 v0.1.1 - Initial release. Built against Oculus SDK 1.10
 v0.1.2 - Added capacitive sensor support. Built against Oculus SDK 1.20
-
+v0.1.3 - Changed initialisation to use Invisible mode. Added button comments to example script.
 
 Installation
 AutoOculusTouch can be placed anywhere. No explicit installation is required.
@@ -46,8 +46,11 @@ AutoOculusTouch can give you:
 
 
 Important Notes
+(v0.1.2 and below)
 Due to the way the Oculus SDK works, running AutoOculusTouch will make Oculus Home or Dash think that a VR application is running that isn't rendering. The original intent was for AutoOculusTouch to run when no headset is being worn, such as using the Oculus Remote for controlling a PC for media playback, so this didn't matter. Running both AutoOculusTouch and another VR application at the same time probably shouldn't work, but it currently seems to.
 
 What does this mean? Well, Oculus Home and Dash refuse to run a VR app while another is already running. But you can still run multiple apps at once if you start them using a means besides Home or Dash (such as explorer).
 
+(v0.1.3 and above)
+The note above is no longer valid in these versions. By setting the Invisible flag when calling the oculus sdk, AutoOculusTouch no longer appears to Dash as a VR app. This means it won't make the headset show a never ending loading screen and other VR apps can be run from Dash without an error.
 

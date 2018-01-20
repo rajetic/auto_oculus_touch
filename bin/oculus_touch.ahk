@@ -7,23 +7,23 @@
 ;///////////////////////////////////////////////////////////////////////////////
 
 ; Button enums
-ovrA         := 0x00000001
-ovrB         := 0x00000002
-ovrRThumb    := 0x00000004
-ovrRShoulder := 0x00000008
-ovrX         := 0x00000100
-ovrY         := 0x00000200
-ovrLThumb    := 0x00000400
-ovrLShoulder := 0x00000800
-ovrUp        := 0x00010000
-ovrDown      := 0x00020000
-ovrLeft      := 0x00040000
-ovrRight     := 0x00080000
-ovrEnter     := 0x00100000
-ovrBack      := 0x00200000
-ovrVolUp     := 0x00400000
-ovrVolDown   := 0x00800000
-ovrHome      := 0x01000000
+ovrA         := 0x00000001      ; Touch-A            Remote-Select       Xbox-A
+ovrB         := 0x00000002      ; Touch-B            Remote-Back         Xbox-B
+ovrRThumb    := 0x00000004      ; Touch-Right Stick  Remote-None         Xbox-Right Thumbstick
+ovrRShoulder := 0x00000008      ; Touch-None         Remote-None         Xbox-Right Shoulder
+ovrX         := 0x00000100      ; Touch-X            Remote-None         Xbox-X
+ovrY         := 0x00000200      ; Touch-Y            Remote-None         Xbox-Y
+ovrLThumb    := 0x00000400      ; Touch-Left Stick   Remote-None         Xbox-Left Thumbstick
+ovrLShoulder := 0x00000800      ; Touch-None         Remote-None         Xbox-Left Shoulder
+ovrUp        := 0x00010000      ; Touch-None         Remote-Up           Xbox-Up
+ovrDown      := 0x00020000      ; Touch-None         Remote-Down         Xbox-Down
+ovrLeft      := 0x00040000      ; Touch-None         Remote-Left         Xbox-Left
+ovrRight     := 0x00080000      ; Touch-None         Remote-Right        Xbox-Right
+ovrEnter     := 0x00100000      ; Touch-Left Menu    Remote-None         Xbox-Start
+ovrBack      := 0x00200000      ; Touch-None         Remote-None         Xbox-Back
+ovrVolUp     := 0x00400000      ; Touch-None         Remote-Volume Up    Xbox-None
+ovrVolDown   := 0x00800000      ; Touch-None         Remote-Volume Down  Xbox-None
+ovrHome      := 0x01000000      ; Touch-Oculus       Remote-Oculus       Xbox-Home
 
 ; Capacitive touch sensors
 ovrTouch_A              := 0x00000001
@@ -59,20 +59,20 @@ YAxis := 1
 
 GetTrigger(hand, trigger)
 {
-	return DllCall("auto_oculus_touch\getTrigger", "Int", hand, "Int", trigger, "Float")
+    return DllCall("auto_oculus_touch\getTrigger", "Int", hand, "Int", trigger, "Float")
 }
 
 GetThumbStick(hand, axis)
 {
-	return DllCall("auto_oculus_touch\getThumbStick", "Int", hand, "Int", axis, "Float")
+    return DllCall("auto_oculus_touch\getThumbStick", "Int", hand, "Int", axis, "Float")
 }
 
 Vibrate(controller, frequency, amplitude)
 {
-	DllCall("auto_oculus_touch\setVibration", "UInt", controller, "Float", frequency, "Float", amplitude)
+    DllCall("auto_oculus_touch\setVibration", "UInt", controller, "Float", frequency, "Float", amplitude)
 }
 
-; Grab the library.	
+; Grab the library. 
 hModule := DllCall("LoadLibrary", "Str", "auto_oculus_touch.dll", "Ptr")
 
 ; Start the Oculus sdk.
@@ -83,56 +83,56 @@ oldTrigger:=0
 
 ; Main polling loop.
 Loop {
-	; Grab the latest Oculus input state (Touch, Remote and Xbox One).
-	DllCall("auto_oculus_touch\poll")
+    ; Grab the latest Oculus input state (Touch, Remote and Xbox One).
+    DllCall("auto_oculus_touch\poll")
 
-	; Get the various analog values. Triggers are 0.0-1.0, thumbsticks are -1.0-1.0
-	leftIndexTrigger  := GetTrigger(LeftHand,  IndexTrigger)
-	leftHandTrigger   := GetTrigger(LeftHand,  HandTrigger)
-	rightIndexTrigger := GetTrigger(RightHand, IndexTrigger)
-	rightHandTrigger  := GetTrigger(RightHand, HandTrigger)
-	leftX             := GetThumbStick(LeftHand, XAxis)
-	leftY             := GetThumbStick(LeftHand, YAxis)
-	rightX            := GetThumbStick(RightHand, XAxis)
-	rightY            := GetThumbStick(RightHand, YAxis)
+    ; Get the various analog values. Triggers are 0.0-1.0, thumbsticks are -1.0-1.0
+    leftIndexTrigger  := GetTrigger(LeftHand,  IndexTrigger)
+    leftHandTrigger   := GetTrigger(LeftHand,  HandTrigger)
+    rightIndexTrigger := GetTrigger(RightHand, IndexTrigger)
+    rightHandTrigger  := GetTrigger(RightHand, HandTrigger)
+    leftX             := GetThumbStick(LeftHand, XAxis)
+    leftY             := GetThumbStick(LeftHand, YAxis)
+    rightX            := GetThumbStick(RightHand, XAxis)
+    rightY            := GetThumbStick(RightHand, YAxis)
 
-	; Get button states. 
-	; Down is the current state. If you test with this, you get a key every poll it is down. Repeating.
-	; Pressed is set if transitioned to down in the last poll. Non repeating.
-	; Released is set if transitioned to up in the last poll. Non repeating.
-	down     := DllCall("auto_oculus_touch\getButtonsDown")
-	pressed  := DllCall("auto_oculus_touch\getButtonsPressed")
-	released := DllCall("auto_oculus_touch\getButtonsReleased")
-	touchDown     := DllCall("auto_oculus_touch\getTouchDown")
-	touchPressed  := DllCall("auto_oculus_touch\getTouchPressed")
-	touchReleased := DllCall("auto_oculus_touch\getTouchReleased")
+    ; Get button states. 
+    ; Down is the current state. If you test with this, you get a key every poll it is down. Repeating.
+    ; Pressed is set if transitioned to down in the last poll. Non repeating.
+    ; Released is set if transitioned to up in the last poll. Non repeating.
+    down     := DllCall("auto_oculus_touch\getButtonsDown")
+    pressed  := DllCall("auto_oculus_touch\getButtonsPressed")
+    released := DllCall("auto_oculus_touch\getButtonsReleased")
+    touchDown     := DllCall("auto_oculus_touch\getTouchDown")
+    touchPressed  := DllCall("auto_oculus_touch\getTouchPressed")
+    touchReleased := DllCall("auto_oculus_touch\getTouchReleased")
 
-	; Now to do something with them.
-	
-	; Move the mouse using the right thumb stick.
-	if (rightX>0.1) or (rightX<-0.1) or (rightY>0.1) or (rightY<-0.1)
-		MouseMove, rightX*10,rightY*-10,0,R
+    ; Now to do something with them.
+    
+    ; Move the mouse using the right thumb stick.
+    if (rightX>0.1) or (rightX<-0.1) or (rightY>0.1) or (rightY<-0.1)
+        MouseMove, rightX*10,rightY*-10,0,R
 
-	; Use the X button as a left mouse button
-	if pressed & ovrX
-		Send, {LButton down}
-	if released & ovrX
-		Send, {LButton up}
+    ; Use the X button as a left mouse button
+    if pressed & ovrX
+        Send, {LButton down}
+    if released & ovrX
+        Send, {LButton up}
 
-	; Use the right index trigger as the left mouse button
-	if (rightIndexTrigger > 0.8) and (oldTrigger<=0.8)
-		Send, {LButton down}
-	if (rightIndexTrigger <= 0.8) and (oldTrigger>0.8)
-		Send, {LButton up}
-		
-	; Use the up/down on the Oculus remote to cycle media tracks.	
-	if released & ovrDown
-		Send, {Media_Next}
-	if released & ovrUp
-		Send, {Media_Prev}
-	
-	oldTrigger := rightIndexTrigger
+    ; Use the right index trigger as the left mouse button
+    if (rightIndexTrigger > 0.8) and (oldTrigger<=0.8)
+        Send, {LButton down}
+    if (rightIndexTrigger <= 0.8) and (oldTrigger>0.8)
+        Send, {LButton up}
+        
+    ; Use the up/down on the Oculus remote to cycle media tracks.   
+    if released & ovrDown
+        Send, {Media_Next}
+    if released & ovrUp
+        Send, {Media_Prev}
+    
+    oldTrigger := rightIndexTrigger
 
-	Sleep, 10
+    Sleep, 10
 }
 

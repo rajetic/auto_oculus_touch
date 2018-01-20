@@ -24,7 +24,7 @@ extern "C"
 
 		ovrGraphicsLuid g_luid;
 		ovrInitParams params;
-		params.Flags = 0;
+		params.Flags = ovrInit_Invisible;
 		params.ConnectionTimeoutMS = 0;
 		params.RequestedMinorVersion = 8;
 		params.UserData = 0;
