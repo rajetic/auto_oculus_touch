@@ -74,6 +74,16 @@ Vibrate(controller, frequency, amplitude)
 
 ; Grab the library. 
 hModule := DllCall("LoadLibrary", "Str", "auto_oculus_touch.dll", "Ptr")
+if !hModule
+{
+    if (A_LastError = 193)
+    {
+        MsgBox You're trying to load 64-bit dll with 32-bit AutoHotkey, use AutoHotkeyU64.exe
+    } else {
+        MsgBox Failed to load dll (error %A_LastError%).
+    }
+    ExitApp
+}
 
 ; Start the Oculus sdk.
 DllCall("auto_oculus_touch\initOculus")
