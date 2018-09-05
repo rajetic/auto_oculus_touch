@@ -5,6 +5,7 @@ oldTrigger:=0
 
 ; Start the Oculus sdk.
 InitOculus()
+InitvJoy(1)
 
 ; Main polling loop.
 Loop {
@@ -12,6 +13,10 @@ Loop {
     Poll()
 
     ; Get the various analog values. Triggers are 0.0-1.0, thumbsticks are -1.0-1.0
+    leftIndexTrigger := GetTrigger(LeftHand, IndexTrigger)
+    leftHandTrigger  := GetTrigger(LeftHand, HandTrigger)
+    leftX            := GetThumbStick(LeftHand, XAxis)
+    leftY            := GetThumbStick(LeftHand, YAxis)
     rightIndexTrigger := GetTrigger(RightHand, IndexTrigger)
     rightHandTrigger  := GetTrigger(RightHand, HandTrigger)
     rightX            := GetThumbStick(RightHand, XAxis)
@@ -29,46 +34,44 @@ Loop {
     touchReleased := GetTouchReleased()
 
     ; Now to do something with them.
-    
-    ; Move the mouse using the right thumb stick.
-    if (rightX>0.1) or (rightX<-0.1) or (rightY>0.1) or (rightY<-0.1)
-        MouseMove, rightX*10,rightY*-10,0,R
+	SetvJoyAxis(HID_USAGE_X, leftX)
+	SetvJoyAxis(HID_USAGE_Y, -leftY)
+	SetvJoyAxis(HID_USAGE_RX, rightX)
+	SetvJoyAxis(HID_USAGE_RY, -rightY)
+	SetvJoyAxisU(HID_USAGE_Z, leftIndexTrigger)
+	SetvJoyAxisU(HID_USAGE_RZ, rightIndexTrigger)
 
-    ; Use the X button as a left mouse button
-    if pressed & ovrA
-        Send, {RButton down}
+		
+	if pressed & ovrA
+        SetvJoyButton(1,1)
     if released & ovrA
-        Send, {RButton up}
-
+        SetvJoyButton(1,0)
+	if pressed & ovrB
+        SetvJoyButton(2,1)
     if released & ovrB
-        ResetFacing(1)
+        SetvJoyButton(2,0)
+	if pressed & ovrX
+        SetvJoyButton(3,1)
+    if released & ovrX
+        SetvJoyButton(3,0)
+	if pressed & ovrY
+        SetvJoyButton(4,1)
+    if released & ovrY
+        SetvJoyButton(4,0)
+	if pressed & ovrEnter
+        SetvJoyButton(5,1)
+    if released & ovrEnter
+        SetvJoyButton(5,0)
 
-    ; Use the right index trigger as the left mouse button
-    if (rightIndexTrigger > 0.8) and (oldTrigger<=0.8)
-        Send, {LButton down}
-    if (rightIndexTrigger <= 0.8) and (oldTrigger>0.8)
-        Send, {LButton up}
-        
-	if rightHandTrigger > 0.8
-	{
-		y:=GetYaw(1)
-		p:=GetPitch(1)
-		dx:=0
-		dy:=0
-		if p>10
-			dy:=p-10
-		if p<-10
-			dy:=p+10
-		if y>10
-			dx:=y-10
-		if y<-10
-			dx:=y+10
+	if leftHandTrigger > 0.7
+        SetvJoyButton(6,1)
+	else
+        SetvJoyButton(6,0)
+	if rightHandTrigger > 0.7
+        SetvJoyButton(7,1)
+	else
+        SetvJoyButton(7,0)
 
-		MouseMove, dx,-dy,0,R
-	}
-	    
-    oldTrigger := rightIndexTrigger
-	
     Sleep, 10
 }
 

@@ -6,10 +6,13 @@
 // https://opensource.org/licenses/MIT
 ///////////////////////////////////////////////////////////////////////////////
 
+#define ROBUST
 #include "stdafx.h"
 #include "OVR_CAPI.h"
 #include "cmath"
 #include "Extras\OVR_Math.h"
+#include "public.h"
+#include "vjoyinterface.h"
 
 #pragma comment(lib,"LibOVR")
 
@@ -34,6 +37,8 @@ ovrVector3f			g_yAxis = { 0,1,0 };	// Y axis of reset tracking coordinate system
 ovrVector3f			g_zAxis = { 0,0,1 };	// Z axis of reset tracking coordinate system
 ovrVector3f			g_origin = { 0,0,0 };	// Origin of reset tracking coordinate system
 
+// vJoy
+int				g_vjoy = -1;
 
 // Functions exported to AutoHotkey
 extern "C"
@@ -64,6 +69,7 @@ extern "C"
 			return 0;
 
 		result = ovr_Create(&g_HMD, &g_luid);
+
 		return g_HMD ? 1 : 0;
 	}
 
@@ -99,6 +105,57 @@ extern "C"
 		}
 	}
 	
+	// Initialise a vJoy device. Currently only a single device can be used by a single auto_oculus_touch script.
+	// device - index from 1 to the number of vJoy devices
+	// return - 0 if init failed, 1 if succeeded
+	__declspec(dllexport) int initvJoy(unsigned int device)
+	{
+		g_vjoy = -1;
+		if (vJoyEnabled())
+		{
+			WORD VerDll, VerDrv;
+			if (DriverMatch(&VerDll, &VerDrv))
+			{
+				VjdStat status = GetVJDStatus(device);
+				if (status == VJD_STAT_FREE)
+				{
+					if(AcquireVJD(device))
+					{
+						g_vjoy = device;
+					}
+				}
+			}
+		}
+		return g_vjoy > -1 ? 1 : 0;
+	}
+
+	// Set the state of a vJoy axis.
+	// value - a float value from -1 to 1
+	// hid - the HID usage code of the axis. These are listed in the auto_oculus_touch.ahk file as HID_USAGE_*
+	__declspec(dllexport) void setvJoyAxis(float value, unsigned int hid)
+	{
+		if (g_vjoy > -1)
+		{
+			if (value < -1.0f)
+				value = -1.0f;
+			if (value > 1.0f)
+				value = 1.0f;
+			long v = long((value*0.5f + 0.5f) * 0x7999) + 1;
+			SetAxis(v, g_vjoy, hid);
+		}
+	}
+
+	// Set the state of a vJoy button.
+	// value - 0==not pressed, 1==pressed
+	// button - an index from 1 to the number of buttons set in vJoy
+	__declspec(dllexport) void setvJoyButton(unsigned int value, unsigned int button)
+	{
+		if (g_vjoy > -1)
+		{
+			SetBtn(value, g_vjoy, button);
+		}
+	}
+
 	// Sets the current desired vibration pattern.
 	// controller - 0==left, 1==right
 	// frequency  - vibration at 1==320Hz, 2==160Hz, 3==106.7Hz, 4=80Hz
@@ -304,6 +361,11 @@ BOOL APIENTRY DllMain(HMODULE hModule,	DWORD  ul_reason_for_call,	LPVOID lpReser
 	case DLL_PROCESS_DETACH:
 		if (g_HMD)
 		{
+			if (g_vjoy > -1)
+			{
+				RelinquishVJD(g_vjoy);
+				g_vjoy = -1;
+			}
 			ovr_Destroy(g_HMD);
 		}
 		ovr_Shutdown();

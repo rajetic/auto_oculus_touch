@@ -59,14 +59,57 @@ HandTrigger  := 1
 XAxis := 0
 YAxis := 1
 
+; vJoy defines
+HID_USAGE_X   := 0x30	; Left gamepad thumbstick x
+HID_USAGE_Y	  := 0x31	; Left gamepad thumbstick y
+HID_USAGE_Z	  := 0x32	; Left gamepad trigger
+HID_USAGE_RX  := 0x33	; Right gamepad thumbstick x
+HID_USAGE_RY  := 0x34	; Right gamepad thumbstick y
+HID_USAGE_RZ  := 0x35	; Right gamepad trigger
+HID_USAGE_SL0 := 0x36
+HID_USAGE_SL1 := 0x37
+HID_USAGE_WHL := 0x38
+HID_USAGE_POV := 0x39
+
+
 InitOculus()
 {
-	DllCall("auto_oculus_touch\initOculus")
+	return DllCall("auto_oculus_touch\initOculus", "UInt")
 }
 
 Poll()
 {
     DllCall("auto_oculus_touch\poll")
+}
+
+GetButtonsDown()
+{
+    return DllCall("auto_oculus_touch\getButtonsDown")
+}
+
+GetButtonsReleased()
+{
+    return DllCall("auto_oculus_touch\getButtonsReleased")
+}
+
+GetButtonsPressed()
+{
+    return DllCall("auto_oculus_touch\getButtonsPressed")
+}
+
+GetTouchDown()
+{
+    return DllCall("auto_oculus_touch\getTouchDown")
+}
+
+GetTouchPressed()
+{
+    return DllCall("auto_oculus_touch\getTouchPressed")
+}
+
+GetTouchReleased()
+{
+    return DllCall("auto_oculus_touch\getTouchReleased")
 }
 
 GetTrigger(hand, trigger)
@@ -104,7 +147,26 @@ ResetFacing(controller)
 	DllCall("auto_oculus_touch\resetFacing", "UInt", controller)
 }
 
+InitvJoy(device)
+{
+	return DllCall("auto_oculus_touch\initvJoy", "UInt", device, "UInt")
+}
+
+SetvJoyAxis(axis, value)
+{
+    return DllCall("auto_oculus_touch\setvJoyAxis", "Float", value, "UInt", axis)
+}
+
+SetvJoyAxisU(axis, value)
+{
+    return DllCall("auto_oculus_touch\setvJoyAxis", "Float", value*2-1, "UInt", axis)
+}
+
+SetvJoyButton(button, value)
+{
+    return DllCall("auto_oculus_touch\setvJoyButton", "UInt", value, "UInt", button)
+}
+
+
 ; Grab the library. 
 hModule := DllCall("LoadLibrary", "Str", "auto_oculus_touch.dll", "Ptr")
-
-

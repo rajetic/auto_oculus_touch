@@ -9,7 +9,13 @@ Loop {
     Poll()
 
     ; Pressed is set if transitioned to down in the last poll. Non repeating.
-    pressed  := DllCall("auto_oculus_touch\getButtonsPressed")
+    down     := GetButtonsDown()
+    pressed  := GetButtonsPressed()
+    released := GetButtonsReleased()
+    touchDown     := GetTouchDown()
+    touchPressed  := GetTouchPressed()
+    touchReleased := GetTouchReleased()
+
     
     ; Use the up/down on the Oculus remote to cycle media tracks and the centre button to play/pause.   
     if released & ovrDown

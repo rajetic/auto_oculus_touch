@@ -9,18 +9,18 @@ speedY := 1
 ; Main polling loop.
 Loop {
     ; Grab the latest Oculus input state (Touch, Remote and Xbox One).
-    DllCall("auto_oculus_touch\poll")
+    Poll()
 
     ; Get button states. 
     ; Down is the current state. If you test with this, you get a key every poll it is down. Repeating.
     ; Pressed is set if transitioned to down in the last poll. Non repeating.
     ; Released is set if transitioned to up in the last poll. Non repeating.
-    down     := DllCall("auto_oculus_touch\getButtonsDown")
-    pressed  := DllCall("auto_oculus_touch\getButtonsPressed")
-    released := DllCall("auto_oculus_touch\getButtonsReleased")
-    touchDown     := DllCall("auto_oculus_touch\getTouchDown")
-    touchPressed  := DllCall("auto_oculus_touch\getTouchPressed")
-    touchReleased := DllCall("auto_oculus_touch\getTouchReleased")
+    down     := GetButtonsDown()
+    pressed  := GetButtonsPressed()
+    released := GetButtonsReleased()
+    touchDown     := GetTouchDown()
+    touchPressed  := GetTouchPressed()
+    touchReleased := GetTouchReleased()
 
     ; Now to do something with them.
     
