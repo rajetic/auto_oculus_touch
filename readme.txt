@@ -1,5 +1,5 @@
 AutoOculusTouch - Helper library to provide AutoHotKey with Oculus Touch state.
-Copyright (C) 2018 Kojack (rajetic@gmail.com)
+Copyright (C) 2019 Kojack (rajetic@gmail.com)
 
 AutoOculusTouch is released under the MIT License  
 https://opensource.org/licenses/MIT
@@ -20,7 +20,7 @@ v0.1.2 - Added capacitive sensor support. Built against Oculus SDK 1.20
 v0.1.3 - Changed initialisation to use Invisible mode. Added button comments to example script.
 v0.1.4 - Added vibration. Added orientation tracking (yaw, pitch, roll) for touch. More example scripts. Built against Oculus SDK 1.26
 v0.1.5 - Added vJoy integration. You can now output gamepad/joystick values for axes and buttons.
-
+v0.1.6 - The vJoy installer has a slightly higher version than the latest vJoy sdk, which breaks compatibility. I've updated it so it should work again. I've added in the Oculus and vJoy sdk files needed to compile, some people had issues setting things up. It should be fairly self contained now. Built against Oculus SDK 1.41. I've improved the vJoy script to have all buttons.
 
 Installation
 AutoOculusTouch can be placed anywhere. No explicit installation is required.
@@ -58,6 +58,7 @@ Vibration has 3 properties: frequency, amplitude and oneshot.
 Frequency: 1==320Hz, 2==160Hz, 3==106.7Hz, 4=80Hz  (this is the frequency of vibration)
 Amplitude: 0-255 (0 stops vibration, 1-255 are the strength)
 Oneshot: If this is zero, the vibration will stay at the level you set until you manually change/stop it. If this is 1, the vibration will be a short pulse then stops on it's own.
+(Note: this probably doesn't work on a Rift-S, they apparently aren't compatible with this style of vibration, it was deprecated)
 
 Orientation Use
 Yaw: clockwise is positive
