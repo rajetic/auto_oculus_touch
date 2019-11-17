@@ -149,24 +149,23 @@ ResetFacing(controller)
 
 InitvJoy(device)
 {
-	return DllCall("auto_oculus_touch\initvJoy", "UInt", device, "UInt")
+	DllCall("auto_oculus_touch\initvJoy", "UInt", device, "UInt")
 }
 
 SetvJoyAxis(axis, value)
 {
-    return DllCall("auto_oculus_touch\setvJoyAxis", "Float", value, "UInt", axis)
+    DllCall("auto_oculus_touch\setvJoyAxis", "Float", value, "UInt", axis)
 }
 
 SetvJoyAxisU(axis, value)
 {
-    return DllCall("auto_oculus_touch\setvJoyAxis", "Float", value*2-1, "UInt", axis)
+    DllCall("auto_oculus_touch\setvJoyAxis", "Float", value*2-1, "UInt", axis)
 }
 
 SetvJoyButton(button, value)
 {
-    return DllCall("auto_oculus_touch\setvJoyButton", "UInt", value, "UInt", button)
+    DllCall("auto_oculus_touch\setvJoyButton", "UInt", value, "UInt", button)
 }
-
 
 ; Grab the library. 
 hModule := DllCall("LoadLibrary", "Str", "auto_oculus_touch.dll", "Ptr")

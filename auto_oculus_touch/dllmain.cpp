@@ -8,13 +8,11 @@
 
 #define ROBUST
 #include "stdafx.h"
-#include "OVR_CAPI.h"
+#include "oculus/OVR_CAPI.h"
 #include "cmath"
-#include "Extras\OVR_Math.h"
-#include "public.h"
-#include "vjoyinterface.h"
-
-#pragma comment(lib,"LibOVR")
+#include "oculus/Extras/OVR_Math.h"
+#include "vjoy/public.h"
+#include "vjoy/vjoyinterface.h"
 
 // Global Variables
 ovrSession			g_HMD = 0;	// The session of the headset
@@ -69,7 +67,6 @@ extern "C"
 			return 0;
 
 		result = ovr_Create(&g_HMD, &g_luid);
-
 		return g_HMD ? 1 : 0;
 	}
 
@@ -243,13 +240,6 @@ extern "C"
 	{
 		if (g_HMD)
 		{
-			unsigned int value = ~g_touchState.Buttons & g_touchStateLast.Buttons;
-			if(g_touchState.Buttons)
-				int dummy = 0;
-			if (g_touchStateLast.Buttons>0)
-			{
-				int dummy = 0;
-			}
 			return ~g_touchState.Buttons & g_touchStateLast.Buttons;
 		}
 		return 0;

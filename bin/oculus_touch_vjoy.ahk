@@ -13,10 +13,10 @@ Loop {
     Poll()
 
     ; Get the various analog values. Triggers are 0.0-1.0, thumbsticks are -1.0-1.0
-    leftIndexTrigger := GetTrigger(LeftHand, IndexTrigger)
-    leftHandTrigger  := GetTrigger(LeftHand, HandTrigger)
-    leftX            := GetThumbStick(LeftHand, XAxis)
-    leftY            := GetThumbStick(LeftHand, YAxis)
+    leftIndexTrigger  := GetTrigger(LeftHand, IndexTrigger)
+    leftHandTrigger   := GetTrigger(LeftHand, HandTrigger)
+    leftX             := GetThumbStick(LeftHand, XAxis)
+    leftY             := GetThumbStick(LeftHand, YAxis)
     rightIndexTrigger := GetTrigger(RightHand, IndexTrigger)
     rightHandTrigger  := GetTrigger(RightHand, HandTrigger)
     rightX            := GetThumbStick(RightHand, XAxis)
@@ -26,9 +26,9 @@ Loop {
     ; Down is the current state. If you test with this, you get a key every poll it is down. Repeating.
     ; Pressed is set if transitioned to down in the last poll. Non repeating.
     ; Released is set if transitioned to up in the last poll. Non repeating.
-    down     := GetButtonsDown()
-    pressed  := GetButtonsPressed()
-    released := GetButtonsReleased()
+    down          := GetButtonsDown()
+    pressed       := GetButtonsPressed()
+    released      := GetButtonsReleased()
     touchDown     := GetTouchDown()
     touchPressed  := GetTouchPressed()
     touchReleased := GetTouchReleased()
@@ -62,6 +62,15 @@ Loop {
         SetvJoyButton(5,1)
     if released & ovrEnter
         SetvJoyButton(5,0)
+
+	if pressed & ovrLThumb
+        SetvJoyButton(8,1)
+    if released & ovrLThumb
+        SetvJoyButton(8,0)
+	if pressed & ovrRThumb
+        SetvJoyButton(9,1)
+    if released & ovrRThumb
+        SetvJoyButton(9,0)
 
 	if leftHandTrigger > 0.7
         SetvJoyButton(6,1)
