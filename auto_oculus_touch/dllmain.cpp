@@ -29,7 +29,7 @@ bool				g_oneShot[2] = { false, false };		// If true, amplitude is reset to 0 af
 
 // Angle and position tracking
 ovrTrackingState	g_trackingState;		// Touch and head tracking data
-float				g_identityAngle[2] = { 0,0 };	// Tracked angle that is reported as 0 degrees to the user (set by resetFacing)
+float				g_identityAngle[3] = { 0,0,0 };	// Tracked angle that is reported as 0 degrees to the user (set by resetFacing)
 ovrVector3f			g_xAxis = { 1,0,0 };	// X axis of reset tracking coordinate system
 ovrVector3f			g_yAxis = { 0,1,0 };	// Y axis of reset tracking coordinate system
 ovrVector3f			g_zAxis = { 0,0,1 };	// Z axis of reset tracking coordinate system
@@ -164,16 +164,169 @@ extern "C"
 		{
 			if (controller < 2)
 			{
-					g_oneShot[controller] = oneShot;
-					g_amplitude[controller] = amplitude;
-					if (frequency >= 1 && frequency < 24)
-						g_frequency[controller] = frequency;
-					for (int i = 0; i < 24; ++i)
-					{
-						g_sampleBuffer[controller][i] = (i % g_frequency[controller]) == 0 ? amplitude : 0;
-					}
+				g_oneShot[controller] = oneShot;
+				g_amplitude[controller] = amplitude;
+				if (frequency >= 1 && frequency < 24)
+					g_frequency[controller] = frequency;
+				for (int i = 0; i < 24; ++i)
+				{
+					g_sampleBuffer[controller][i] = (i % g_frequency[controller]) == 0 ? amplitude : 0;
+				}
 			}
 		}
+	}
+
+
+
+	__declspec(dllexport) float getAxis(unsigned int axis)
+	{
+		if (g_HMD)
+		{
+			switch (axis)
+			{
+			case 0:
+				return g_touchState.IndexTrigger[0];
+				break;
+			case 1:
+				return g_touchState.IndexTrigger[1];
+				break;
+			case 2:
+				return g_touchState.HandTrigger[0];
+				break;
+			case 3:
+				return g_touchState.HandTrigger[1];
+				break;
+			case 4:
+				return g_touchState.Thumbstick[0].x;
+				break;
+			case 5:
+				return g_touchState.Thumbstick[1].x;
+				break;
+			case 6:
+				return g_touchState.Thumbstick[0].y;
+				break;
+			case 7:
+				return g_touchState.Thumbstick[1].y;
+				break;
+			}
+		}
+		return 0;
+	}
+
+	int hitThreshold(float current, float last, float threshold)
+	{
+		if (current >= threshold && last < threshold)
+		{
+			return 1;
+		} 
+		else if (current < threshold && last >= threshold)
+		{
+			return -1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	__declspec(dllexport) float reached(unsigned int axis, float value)
+	{
+		if (g_HMD)
+		{
+			switch (axis)
+			{
+			case 0:
+				return hitThreshold(g_touchState.IndexTrigger[0], g_touchStateLast.IndexTrigger[0], value);
+				break;
+			case 1:
+				return hitThreshold(g_touchState.IndexTrigger[1], g_touchStateLast.IndexTrigger[1], value);
+				break;
+			case 2:
+				return hitThreshold(g_touchState.HandTrigger[0], g_touchStateLast.HandTrigger[0], value);
+				break;
+			case 3:
+				return hitThreshold(g_touchState.HandTrigger[1], g_touchStateLast.HandTrigger[1], value);
+				break;
+			case 4:
+				return hitThreshold(g_touchState.Thumbstick[0].x, g_touchStateLast.Thumbstick[0].x, value);
+				break;
+			case 5:
+				return hitThreshold(g_touchState.Thumbstick[1].x, g_touchStateLast.Thumbstick[1].x, value);
+				break;
+			case 6:
+				return hitThreshold(g_touchState.Thumbstick[0].y, g_touchStateLast.Thumbstick[0].y, value);
+				break;
+			case 7:
+				return hitThreshold(g_touchState.Thumbstick[1].y, g_touchStateLast.Thumbstick[1].y, value);
+				break;
+			}
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) unsigned int isPressed(unsigned int button)
+	{
+		if (g_HMD)
+		{
+			return (g_touchState.Buttons & ~g_touchStateLast.Buttons) & button;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) unsigned int isReleased(unsigned int button)
+	{
+		if (g_HMD)
+		{
+			return (~g_touchState.Buttons & g_touchStateLast.Buttons) & button;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) unsigned int isDown(unsigned int button)
+	{
+		if (g_HMD)
+		{
+			return g_touchState.Buttons & button;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) unsigned int isTouchPressed(unsigned int button)
+	{
+		if (g_HMD)
+		{
+			return (g_touchState.Touches & ~g_touchStateLast.Touches) & button;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) unsigned int isTouchReleased(unsigned int button)
+	{
+		if (g_HMD)
+		{
+			return (~g_touchState.Touches & g_touchStateLast.Touches) & button;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) unsigned int isTouchDown(unsigned int button)
+	{
+		if (g_HMD)
+		{
+			return g_touchState.Touches & button;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) unsigned int isWearing()
+	{
+		if (g_HMD)
+		{
+			ovrSessionStatus status;
+			ovr_GetSessionStatus(g_HMD, &status);
+			return status.HmdMounted;
+		}
+		return 0;
 	}
 
 	// Retrieve the current trigger value
@@ -274,9 +427,15 @@ extern "C"
 
 	__declspec(dllexport) float getYaw(unsigned int controller)
 	{
+		if (controller > 2)
+			return 0;
 		if (g_HMD)
 		{
-			OVR::Quatf q = g_trackingState.HandPoses[controller].ThePose.Orientation;
+			OVR::Quatf q;
+			if(controller>=0 && controller<2)
+				q = g_trackingState.HandPoses[controller].ThePose.Orientation;
+			else
+				q = g_trackingState.HeadPose.ThePose.Orientation;
 			float yaw, pitch, roll;
 			q.GetYawPitchRoll(&yaw, &pitch, &roll);
 			yaw -= g_identityAngle[controller];
@@ -288,9 +447,15 @@ extern "C"
 
 	__declspec(dllexport) float getPitch(unsigned int controller)
 	{
+		if (controller > 2)
+			return 0;
 		if (g_HMD)
 		{
-			OVR::Quatf q = g_trackingState.HandPoses[controller].ThePose.Orientation;
+			OVR::Quatf q;
+			if (controller >= 0 && controller < 2)
+				q = g_trackingState.HandPoses[controller].ThePose.Orientation;
+			else
+				q = g_trackingState.HeadPose.ThePose.Orientation;
 			float yaw, pitch, roll;
 			q.GetYawPitchRoll(&yaw, &pitch, &roll);
 			return pitch * (180.0 / 3.14159265);
@@ -300,10 +465,15 @@ extern "C"
 
 	__declspec(dllexport) float getRoll(unsigned int controller)
 	{
+		if (controller > 2)
+			return 0;
 		if (g_HMD)
 		{
-			OVR::Quatf q = g_trackingState.HandPoses[controller].ThePose.Orientation;
-			float yaw, pitch, roll;
+			OVR::Quatf q;
+			if (controller >= 0 && controller < 2)
+				q = g_trackingState.HandPoses[controller].ThePose.Orientation;
+			else
+				q = g_trackingState.HeadPose.ThePose.Orientation;			float yaw, pitch, roll;
 			q.GetYawPitchRoll(&yaw, &pitch, &roll);
 			return -roll * (180.0/3.14159265);
 		}
@@ -312,10 +482,14 @@ extern "C"
 
 	__declspec(dllexport) void resetFacing(unsigned int controller)
 	{
-		if (!g_HMD || controller > 1)
+		if (!g_HMD || controller > 2)
 			return;
 
-		OVR::Quatf q = g_trackingState.HandPoses[controller].ThePose.Orientation;
+		OVR::Quatf q;
+		if (controller >= 0 && controller < 2)
+			q = g_trackingState.HandPoses[controller].ThePose.Orientation;
+		else
+			q = g_trackingState.HeadPose.ThePose.Orientation;
 		float pitch, roll;
 		q.GetYawPitchRoll(&g_identityAngle[controller], &pitch, &roll);
 
@@ -333,6 +507,52 @@ extern "C"
 		//g_zAxis.x = 2 * x*z - 2 * w*y;
 		//g_zAxis.y = 2 * y*z + 2 * w*x;
 		//g_zAxis.z = 1.0f - (2 * x*x + 2 * y*y);
+	}
+
+	__declspec(dllexport) void sendRawMouseMove(int x, int y, int z)
+	{
+		INPUT mi;
+		mi.type = INPUT_MOUSE;
+		mi.mi.dx = x;
+		mi.mi.dy = y;
+		mi.mi.mouseData = z;
+		mi.mi.dwFlags = MOUSEEVENTF_MOVE | (z!=0?MOUSEEVENTF_WHEEL:0);
+		mi.mi.dwExtraInfo = 0;
+		mi.mi.time = 0;
+		SendInput(1, (LPINPUT)&mi, sizeof(mi));
+	}
+
+	__declspec(dllexport) void sendRawMouseButtonDown(unsigned int button)
+	{
+		DWORD buttons[] = { MOUSEEVENTF_LEFTDOWN,MOUSEEVENTF_MIDDLEDOWN,MOUSEEVENTF_RIGHTDOWN };
+		if (button < 3)
+		{
+			INPUT mi;
+			mi.type = INPUT_MOUSE;
+			mi.mi.dx = 0;
+			mi.mi.dy = 0;
+			mi.mi.mouseData = 0;
+			mi.mi.dwFlags = buttons[button];
+			mi.mi.dwExtraInfo = 0;
+			mi.mi.time = 0;
+			SendInput(1, (LPINPUT)&mi, sizeof(mi));
+		}
+	}
+	__declspec(dllexport) void sendRawMouseButtonUp(unsigned int button)
+	{
+		DWORD buttons[] = { MOUSEEVENTF_LEFTUP,MOUSEEVENTF_MIDDLEUP,MOUSEEVENTF_RIGHTUP };
+		if (button < 3)
+		{
+			INPUT mi;
+			mi.type = INPUT_MOUSE;
+			mi.mi.dx = 0;
+			mi.mi.dy = 0;
+			mi.mi.mouseData = 0;
+			mi.mi.dwFlags = buttons[button];
+			mi.mi.dwExtraInfo = 0;
+			mi.mi.time = 0;
+			SendInput(1, (LPINPUT)&mi, sizeof(mi));
+		}
 	}
 }
 

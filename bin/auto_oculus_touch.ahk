@@ -54,10 +54,21 @@ ovrControllerType_XBox   := 0x0010
 ; Misc defines
 LeftHand  := 0
 RightHand := 1
+Head := 2
 IndexTrigger := 0
 HandTrigger  := 1
 XAxis := 0
 YAxis := 1
+
+; Axis defines
+AxisIndexTriggerLeft := 0
+AxisIndexTriggerRight := 1
+AxisHandTriggerLeft := 2
+AxisHandTriggerRight := 3
+AxisXLeft := 4
+AxisXRight := 5
+AxisYLeft := 6
+AxisYRight := 7
 
 ; vJoy defines
 HID_USAGE_X   := 0x30	; Left gamepad thumbstick x
@@ -71,101 +82,211 @@ HID_USAGE_SL1 := 0x37
 HID_USAGE_WHL := 0x38
 HID_USAGE_POV := 0x39
 
+; Grab the library. 
+AOTModule := DllCall("LoadLibrary", "Str", "auto_oculus_touch.dll", "Ptr")
+if AOTModule!=0
+{
+	
+}
+else
+{
+	MsgBox, The auto_oculus_touch.dll file is missing from the search path.
+	ExitApp
+}
+
+Func_initOculus := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "initOculus", "Ptr")
+Func_poll := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "poll", "Ptr")
+Func_isWearing := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "isWearing", "Ptr")
+Func_isPressed := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "isPressed", "Ptr")
+Func_isReleased := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "isReleased", "Ptr")
+Func_isDown := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "isDown", "Ptr")
+Func_isTouchPressed := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "isTouchPressed", "Ptr")
+Func_isTouchReleased := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "isTouchReleased", "Ptr")
+Func_isTouchDown := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "isTouchDown", "Ptr")
+Func_reached := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "reached", "Ptr")
+Func_getAxis := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getAxis", "Ptr")
+Func_getButtonsDown := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getButtonsDown", "Ptr")
+Func_getButtonsReleased := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getButtonsReleased", "Ptr")
+Func_getButtonsPressed := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getButtonsPressed", "Ptr")
+Func_getTouchDown := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getTouchDown", "Ptr")
+Func_getTouchPressed := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getTouchPressed", "Ptr")
+Func_getTouchReleased := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getTouchReleased", "Ptr")
+Func_getTrigger := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getTrigger", "Ptr")
+Func_getThumbStick := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getThumbStick", "Ptr")
+Func_setVibration := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setVibration", "Ptr")
+Func_getYaw := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getYaw", "Ptr")
+Func_getPitch := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getPitch", "Ptr")
+Func_getRoll := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getRoll", "Ptr")
+Func_resetFacing := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "resetFacing", "Ptr")
+Func_initvJoy := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "initvJoy", "Ptr")
+Func_setvJoyAxis := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setvJoyAxis", "Ptr")
+Func_setvJoyButton := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setvJoyButton", "Ptr")
 
 InitOculus()
 {
-	return DllCall("auto_oculus_touch\initOculus", "UInt")
+	global Func_initOculus
+	return DllCall(Func_initOculus, "UInt")
 }
 
 Poll()
 {
-    DllCall("auto_oculus_touch\poll")
+	global Func_poll
+    DllCall(Func_poll)
+}
+
+Wearing()
+{
+	global Func_isWearing
+	return DllCall(Func_isWearing)
+}
+
+IsPressed(button)
+{
+	global Func_isPressed
+    return DllCall(Func_isPressed, "UInt", button)
+}
+
+IsReleased(button)
+{
+	global Func_isReleased
+    return DllCall(Func_isReleased, "UInt", button)
+}
+
+IsDown(button)
+{
+	global Func_isDown
+    return DllCall(Func_isDown, "UInt", button)
+}
+
+IsTouchPressed(button)
+{
+	global Func_isTouchPressed
+    return DllCall(Func_isTouchPressed, "UInt", button)
+}
+
+IsTouchReleased(button)
+{
+	global Func_isTouchReleased
+    return DllCall(Func_isTouchReleased, "UInt", button)
+}
+
+IsTouchDown(button)
+{
+	global Func_isTouchDown
+    return DllCall(Func_isTouchDown, "UInt", button)
+}
+
+Reached(axis, value)
+{
+	global Func_reached
+	return DllCall(Func_reached, "UInt", axis, "Float", value)
+}
+
+GetAxis(axis)
+{
+	global Func_getAxis
+	return DllCall(Func_getAxis, "UInt", axis, "Float")
 }
 
 GetButtonsDown()
 {
-    return DllCall("auto_oculus_touch\getButtonsDown")
+	global Func_getButtonsDown
+    return DllCall(Func_getButtonsDown)
 }
 
 GetButtonsReleased()
 {
-    return DllCall("auto_oculus_touch\getButtonsReleased")
+	global Func_getButtonsReleased
+    return DllCall(Func_getButtonsReleased)
 }
 
 GetButtonsPressed()
 {
-    return DllCall("auto_oculus_touch\getButtonsPressed")
+	global Func_getButtonsPressed
+    return DllCall(Func_getButtonsPressed)
 }
 
 GetTouchDown()
 {
-    return DllCall("auto_oculus_touch\getTouchDown")
+	global Func_getTouchDown
+    return DllCall(Func_getTouchDown)
 }
 
 GetTouchPressed()
 {
-    return DllCall("auto_oculus_touch\getTouchPressed")
+	global Func_getTouchPressed
+    return DllCall(Func_getTouchPressed)
 }
 
 GetTouchReleased()
 {
-    return DllCall("auto_oculus_touch\getTouchReleased")
+	global Func_getTouchReleased
+    return DllCall(Func_getTouchReleased)
 }
 
 GetTrigger(hand, trigger)
 {
-    return DllCall("auto_oculus_touch\getTrigger", "Int", hand, "Int", trigger, "Float")
+	global Func_getTrigger
+    return DllCall(Func_getTrigger, "Int", hand, "Int", trigger, "Float")
 }
 
 GetThumbStick(hand, axis)
 {
-    return DllCall("auto_oculus_touch\getThumbStick", "Int", hand, "Int", axis, "Float")
+	global Func_getThumbStick
+    return DllCall(Func_getThumbStick, "Int", hand, "Int", axis, "Float")
 }
 
 Vibrate(controller, frequency, amplitude, oneshot)
 {
-    DllCall("auto_oculus_touch\setVibration", "UInt", controller, "UInt", frequency, "UChar", amplitude, "UInt", oneshot)
+	global Func_setVibration
+    DllCall(Func_setVibration, "UInt", controller, "UInt", frequency, "UChar", amplitude, "UInt", oneshot)
 }
 
 GetYaw(controller)
 {
-    return DllCall("auto_oculus_touch\getYaw", "UInt", controller, "Float")
+	global Func_getYaw
+    return DllCall(Func_getYaw, "UInt", controller, "Float")
 }
 
 GetPitch(controller)
 {
-    return DllCall("auto_oculus_touch\getPitch", "UInt", controller, "Float")
+	global Func_getPitch
+    return DllCall(Func_getPitch, "UInt", controller, "Float")
 }
 
 GetRoll(controller)
 {
-    return DllCall("auto_oculus_touch\getRoll", "UInt", controller, "Float")
+	global Func_getRoll
+    return DllCall(Func_getRoll, "UInt", controller, "Float")
 }
 
 ResetFacing(controller)
 {
-	DllCall("auto_oculus_touch\resetFacing", "UInt", controller)
+	global Func_resetFacing
+	DllCall(Func_resetFacing, "UInt", controller)
 }
 
 InitvJoy(device)
 {
-	DllCall("auto_oculus_touch\initvJoy", "UInt", device, "UInt")
+	global Func_initvJoy
+	DllCall(Func_initvJoy, "UInt", device, "UInt")
 }
 
 SetvJoyAxis(axis, value)
 {
-    DllCall("auto_oculus_touch\setvJoyAxis", "Float", value, "UInt", axis)
+	global Func_setvJoyAxis
+    DllCall(Func_setvJoyAxis, "Float", value, "UInt", axis)
 }
 
 SetvJoyAxisU(axis, value)
 {
-    DllCall("auto_oculus_touch\setvJoyAxis", "Float", value*2-1, "UInt", axis)
+	global Func_setvJoyAxis
+    DllCall(Func_setvJoyAxis, "Float", value*2-1, "UInt", axis)
 }
 
 SetvJoyButton(button, value)
 {
-    DllCall("auto_oculus_touch\setvJoyButton", "UInt", value, "UInt", button)
+	global Func_setvJoyButton
+    DllCall(Func_setvJoyButton, "UInt", value, "UInt", button)
 }
 
-; Grab the library. 
-hModule := DllCall("LoadLibrary", "Str", "auto_oculus_touch.dll", "Ptr")
