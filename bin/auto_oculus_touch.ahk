@@ -59,6 +59,9 @@ IndexTrigger := 0
 HandTrigger  := 1
 XAxis := 0
 YAxis := 1
+LeftMouse := 0
+RightMouse := 1
+MiddleMouse := 2
 
 ; Tracking origin
 OriginEye := 0
