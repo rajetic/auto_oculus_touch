@@ -1,4 +1,7 @@
 #include auto_oculus_touch.ahk
+; Media player Remote Example
+; Use the up/down on the Oculus remote to cycle media tracks and the centre button to play/pause.
+; Should work with anything that accepts the next/previous and play media keys, such as Spotify.
 
 ; Start the Oculus sdk.
 InitOculus()
@@ -8,21 +11,12 @@ Loop {
     ; Grab the latest Oculus input state (Touch, Remote and Xbox One).
     Poll()
 
-    ; Pressed is set if transitioned to down in the last poll. Non repeating.
-    down     := GetButtonsDown()
-    pressed  := GetButtonsPressed()
-    released := GetButtonsReleased()
-    touchDown     := GetTouchDown()
-    touchPressed  := GetTouchPressed()
-    touchReleased := GetTouchReleased()
-
-    
-    ; Use the up/down on the Oculus remote to cycle media tracks and the centre button to play/pause.   
-    if released & ovrDown
+       
+    if IsReleased(ovrDown)
         SendInput {Media_Next}
-    if released & ovrUp
+    if IsReleased(ovrUp)
         SendInput {Media_Prev}
-	if released & ovrEnter
+	if IsReleased(ovrEnter)
 		SendInput {Media_Play_Pause}
 
     Sleep 10

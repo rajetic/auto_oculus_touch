@@ -247,10 +247,10 @@ GetThumbStick(hand, axis)
     return DllCall(Func_getThumbStick, "Int", hand, "Int", axis, "Float")
 }
 
-Vibrate(controller, frequency, amplitude, oneshot)
+Vibrate(controller, frequency, amplitude, length)
 {
 	global Func_setVibration
-    DllCall(Func_setVibration, "UInt", controller, "UInt", frequency, "UChar", amplitude, "UInt", oneshot)
+    DllCall(Func_setVibration, "UInt", controller, "UInt", frequency, "UChar", amplitude, "Float", length)
 }
 
 GetYaw(controller)
@@ -348,3 +348,5 @@ SendRawMouseButtonUp(button)
 	global Func_sendRawMouseButtonUp
     DllCall(Func_sendRawMouseButtonUp, "UInt", button)
 }
+
+

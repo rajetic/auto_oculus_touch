@@ -5,55 +5,74 @@ InitOculus()
 
 Gui, Color, White
 Gui, Font,s16, Arial  
-;Gui, Add, Button, Default xp+20 yp+250, Start the Bar Moving
-;Gui, Add, Progress, vMyProgress w416
-;Gui, Add, Text, vMyText wp  ; wp means "use width of previous".
-Gui, Add, Text,, Left Thumbstick:
+Gui, Add, Text,section, Left Thumbstick:
 Gui, Add, Slider, vguiLeftX
 Gui, Add, Slider, vguiLeftY
-Gui, Add, Text,, Right Thumbstick:
-Gui, Add, Slider, vguiRightX
-Gui, Add, Slider, vguiRightY
 Gui, Add, Text,, Left Index Trigger:
 Gui, Add, Slider, vguiLeftIT
 Gui, Add, Text,, Left Hand Trigger:
 Gui, Add, Slider, vguiLeftHT
+Gui, Add, Text,ys, Right Thumbstick:
+Gui, Add, Slider, vguiRightX
+Gui, Add, Slider, vguiRightY
 Gui, Add, Text,, Right Index Trigger:
 Gui, Add, Slider, vguiRightIT
 Gui, Add, Text,, Right Hand Trigger:
 Gui, Add, Slider, vguiRightHT
-Gui, Add, Text, vtb, Buttons: ----------------------------------------
+Gui, Add, Text, vtb section xm, Buttons: ----------------------------------------
 Gui, Add, Text, vtt, Touch: ----------------------------------------
-
-Gui, Add, Text,, Left Yaw Pitch Roll:
+Gui, Add, Text, vtw, Wearing: ---------------------------------------
+Gui, Add, Text,section, Left Yaw Pitch Roll:
 Gui, Add, Slider, vguiLYaw
 Gui, Add, Slider, vguiLPitch
 Gui, Add, Slider, vguiLRoll
-Gui, Add, Text,, Right Yaw Pitch Roll:
+Gui, Add, Text,, Left Position
+Gui, Add, Text, vlpx, Left Pos X: --------------------------
+Gui, Add, Text, vlpy, Left Pos Y: --------------------------
+Gui, Add, Text, vlpz, Left Pos Z: --------------------------
+Gui, Add, Text,ys, Right Yaw Pitch Roll:
 Gui, Add, Slider, vguiRYaw
 Gui, Add, Slider, vguiRPitch
 Gui, Add, Slider, vguiRRoll
-Gui, Add, Button,, VibrateOn
-Gui, Add, Button,, VibrateOff
+Gui, Add, Text,, Right Position
+Gui, Add, Text, vrpx, Left Pos X: --------------------------
+Gui, Add, Text, vrpy, Left Pos Y: --------------------------
+Gui, Add, Text, vrpz, Left Pos Z: --------------------------
+Gui, Add, Text,ys, Head Yaw Pitch Roll:
+Gui, Add, Slider, vguiHYaw
+Gui, Add, Slider, vguiHPitch
+Gui, Add, Slider, vguiHRoll
+Gui, Add, Text,, Head Position
+Gui, Add, Text, vhpx, Left Pos X: --------------------------
+Gui, Add, Text, vhpy, Left Pos Y: --------------------------
+Gui, Add, Text, vhpz, Left Pos Z: --------------------------
+
+
+Gui, Add, Button,section xm, VibrateOn
+Gui, Add, Button,ys, VibrateOff
+Gui, Add, Button,section xm, VibratePulse
 Gui, Show
 
 DllCall("auto_oculus_touch\poll")
 ResetFacing(0)
 ResetFacing(1)
+ResetFacing(2)
+
+SetTrackingOrigin(OriginFloor)
 
 Loop {
     ; Grab the latest Oculus input state (Touch, Remote and Xbox One).
     Poll()
 
     ; Get the various analog values. Triggers are 0.0-1.0, thumbsticks are -1.0-1.0
-    leftIndexTrigger  := GetTrigger(LeftHand,  IndexTrigger)
-    leftHandTrigger   := GetTrigger(LeftHand,  HandTrigger)
-    rightIndexTrigger := GetTrigger(RightHand, IndexTrigger)
-    rightHandTrigger  := GetTrigger(RightHand, HandTrigger)
-    leftX             := GetThumbStick(LeftHand, XAxis)
-    leftY             := GetThumbStick(LeftHand, YAxis)
-    rightX            := GetThumbStick(RightHand, XAxis)
-    rightY            := GetThumbStick(RightHand, YAxis)
+    leftIndexTrigger  := GetAxis(AxisIndexTriggerLeft)
+    leftHandTrigger   := GetAxis(AxisHandTriggerLeft)
+    rightIndexTrigger := GetAxis(AxisIndexTriggerRight)
+    rightHandTrigger  := GetAxis(AxisHandTriggerRight)
+    leftX             := GetAxis(AxisXLeft)
+    leftY             := GetAxis(AxisYLeft)
+    rightX            := GetAxis(AxisXRight)
+    rightY            := GetAxis(AxisYRight)
 
 	leftYaw 		  := (GetYaw(0)+180)/3.6
 	leftPitch		  := (GetPitch(0)+90)/1.8
@@ -61,107 +80,142 @@ Loop {
 	rightYaw 		  := (GetYaw(1)+180)/3.6
 	rightPitch		  := (GetPitch(1)+90)/1.8
 	rightRoll		  := (GetRoll(1)+180)/3.6
+	headYaw 		  := (GetYaw(2)+180)/3.6
+	headPitch		  := (GetPitch(2)+90)/1.8
+	headRoll		  := (GetRoll(2)+180)/3.6
 
     ; Get button states. 
-    ; Down is the current state. If you test with this, you get a key every poll it is down. Repeating.
-    ; Pressed is set if transitioned to down in the last poll. Non repeating.
-    ; Released is set if transitioned to up in the last poll. Non repeating.
-    down     := GetButtonsDown()
-    pressed  := GetButtonsPressed()
-    released := GetButtonsReleased()
-    touchDown     := GetTouchDown()
-    touchPressed  := GetTouchPressed()
-    touchReleased := GetTouchReleased()
 	lx := leftX*50+50
 	ly := leftY*50+50
 	rx := rightX*50+50
 	ry := rightY*50+50
 	buttontext := "Buttons: "
-	if down & ovrA
+	if IsDown(ovrA)
 		buttontext := buttontext . "A "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrB
+	if IsDown(ovrB)
 		buttontext := buttontext . "B "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrX
+	if IsDown(ovrX)
 		buttontext := buttontext . "X "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrY
+	if IsDown(ovrY)
 		buttontext := buttontext . "Y "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrLThumb
+	if IsDown(ovrLThumb)
 		buttontext := buttontext . "LT "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrRThumb
+	if IsDown(ovrRThumb)
 		buttontext := buttontext . "RT "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrLShoulder
+	if IsDown(ovrLShoulder)
 		buttontext := buttontext . "LS "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrRShoulder
+	if IsDown(ovrRShoulder)
 		buttontext := buttontext . "RS "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrLeft
+	if IsDown(ovrLeft)
 		buttontext := buttontext . "L "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrRight
+	if IsDown(ovrRight)
 		buttontext := buttontext . "R "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrUp
+	if IsDown(ovrUp)
 		buttontext := buttontext . "U "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrDown
+	if IsDown(ovrDown)
 		buttontext := buttontext . "D "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrBack
+	if IsDown(ovrBack)
 		buttontext := buttontext . "Back "
 	else
 		buttontext := buttontext . "- "
-	if down & ovrEnter
+	if IsDown(ovrEnter)
 		buttontext := buttontext . "E "
 	else
 		buttontext := buttontext . "- "
 
 	touchtext := "Touching: "
-	if touchDown & ovrTouch_A
+	if IsTouchDown(ovrTouch_A)
 		touchtext := touchtext . "A "
-	if touchDown & ovrTouch_B
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_B)
 		touchtext := touchtext . "B "
-	if touchDown & ovrTouch_X
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_X)
 		touchtext := touchtext . "X "
-	if touchDown & ovrTouch_Y
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_Y)
 		touchtext := touchtext . "Y "
-	if touchDown & ovrTouch_LThumb
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_LThumb)
 		touchtext := touchtext . "LThumb "
-	if touchDown & ovrTouch_LThumbRest
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_LThumbRest)
 		touchtext := touchtext . "LThumbRest "
-	if touchDown & ovrTouch_LIndexTrigger
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_LIndexTrigger)
 		touchtext := touchtext . "LTrig "
-	if touchDown & ovrTouch_RThumb
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_RThumb)
 		touchtext := touchtext . "RThumb "
-	if touchDown & ovrTouch_RThumbRest
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_RThumbRest)
 		touchtext := touchtext . "RThumbRest "
-	if touchDown & ovrTouch_RIndexTrigger
+	else
+		touchtext := touchtext . "- "
+	if IsTouchDown(ovrTouch_RIndexTrigger)
 		touchtext := touchtext . "RTrig "
-
+	else
+		touchtext := touchtext . "- "
+		
+	if Wearing()
+	{
+		;touchtext := "Wear"
+		wearingText := "Wearing headset: True"
+		;Vibrate(0, 1, 255, 0)
+		;Vibrate(1, 1, 255, 0)
+	}
+	else
+	{
+		wearingText := "Wearing headset: False"
+	}
 
 	lit := leftIndexTrigger * 100
 	lht := leftHandTrigger * 100
 	rit := rightIndexTrigger * 100
 	rht := rightHandTrigger * 100
 
+	leftPosX := GetPositionX(0)
+	leftPosY := GetPositionY(0)
+	leftPosZ := GetPositionZ(0)
+	rightPosX := GetPositionX(1)
+	rightPosY := GetPositionY(1)
+	rightPosZ := GetPositionZ(1)
+	headPosX := GetPositionX(2)
+	headPosY := GetPositionY(2)
+	headPosZ := GetPositionZ(2)
+	
 	GuiControl,, guiLeftX, %lx%
 	GuiControl,, guiLeftY, %ly%
 	GuiControl,, guiRightX, %rx%
@@ -172,12 +226,25 @@ Loop {
 	GuiControl,, guiRightHT, %rht%
 	GuiControl,, tb, %buttontext%
 	GuiControl,, tt, %touchtext%
+	GuiControl,, tw, %wearingText%
 	GuiControl,, guiLYaw, %leftYaw%
 	GuiControl,, guiLPitch, %leftPitch%
 	GuiControl,, guiLRoll, %leftRoll%
 	GuiControl,, guiRYaw, %rightYaw%
 	GuiControl,, guiRPitch, %rightPitch%
 	GuiControl,, guiRRoll, %rightRoll%
+	GuiControl,, guiHYaw, %headYaw%
+	GuiControl,, guiHPitch, %headPitch%
+	GuiControl,, guiHRoll, %headRoll%
+	GuiControl,, lpx, %leftPosX%
+	GuiControl,, lpy, %leftPosY%
+	GuiControl,, lpz, %leftPosZ%
+	GuiControl,, rpx, %rightPosX%
+	GuiControl,, rpy, %rightPosY%
+	GuiControl,, rpz, %rightPosZ%
+	GuiControl,, hpx, %headPosX%
+	GuiControl,, hpy, %headPosY%
+	GuiControl,, hpz, %headPosZ%
 	Gui, Show
 	
     Sleep 10
@@ -191,6 +258,11 @@ ButtonVibrateOn:
 ButtonVibrateOff:
 	Vibrate(0, 1, 0, 0)
 	Vibrate(1, 1, 0, 0)
+	return
+
+ButtonVibratePulse:
+	Vibrate(0, 1, 255, 0.5)
+	Vibrate(1, 1, 255, 0.5)
 	return
 
 GuiClose:
