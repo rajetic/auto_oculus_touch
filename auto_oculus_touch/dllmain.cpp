@@ -498,6 +498,61 @@ extern "C"
 		return 0;
 	}
 
+	__declspec(dllexport) float getPositionX(unsigned int controller)
+	{
+		if (controller > 2)
+			return 0;
+		if (g_HMD)
+		{
+			float value;
+			if (controller >= 0 && controller < 2)
+				value = g_trackingState.HandPoses[controller].ThePose.Position.x;
+			else
+				value = g_trackingState.HeadPose.ThePose.Position.x;
+			return value;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) float getPositionY(unsigned int controller)
+	{
+		if (controller > 2)
+			return 0;
+		if (g_HMD)
+		{
+			float value;
+			if (controller >= 0 && controller < 2)
+				value = g_trackingState.HandPoses[controller].ThePose.Position.y;
+			else
+				value = g_trackingState.HeadPose.ThePose.Position.y;
+			return value;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) float getPositionZ(unsigned int controller)
+	{
+		if (controller > 2)
+			return 0;
+		if (g_HMD)
+		{
+			float value;
+			if (controller >= 0 && controller < 2)
+				value = g_trackingState.HandPoses[controller].ThePose.Position.z;
+			else
+				value = g_trackingState.HeadPose.ThePose.Position.z;
+			return value;
+		}
+		return 0;
+	}
+
+	__declspec(dllexport) void setTrackingOrigin(unsigned int origin)
+	{
+		if (g_HMD)
+		{
+			ovr_SetTrackingOriginType(g_HMD, origin == 0 ? ovrTrackingOrigin::ovrTrackingOrigin_EyeLevel : ovrTrackingOrigin::ovrTrackingOrigin_FloorLevel);
+		}
+	}
 	__declspec(dllexport) void resetFacing(unsigned int controller)
 	{
 		if (!g_HMD || controller > 2)

@@ -60,6 +60,10 @@ HandTrigger  := 1
 XAxis := 0
 YAxis := 1
 
+; Tracking origin
+OriginEye := 0
+OriginFloor := 1
+
 ; Axis defines
 AxisIndexTriggerLeft := 0
 AxisIndexTriggerRight := 1
@@ -117,6 +121,10 @@ Func_setVibration := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setVib
 Func_getYaw := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getYaw", "Ptr")
 Func_getPitch := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getPitch", "Ptr")
 Func_getRoll := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getRoll", "Ptr")
+Func_getPositionX := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getPositionX", "Ptr")
+Func_getPositionY := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getPositionY", "Ptr")
+Func_getPositionZ := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "getPositionZ", "Ptr")
+Func_setTrackingOrigin := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setTrackingOrigin", "Ptr")
 Func_resetFacing := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "resetFacing", "Ptr")
 Func_initvJoy := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "initvJoy", "Ptr")
 Func_setvJoyAxis := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setvJoyAxis", "Ptr")
@@ -261,6 +269,30 @@ GetRoll(controller)
 {
 	global Func_getRoll
     return DllCall(Func_getRoll, "UInt", controller, "Float")
+}
+
+GetPositionX(controller)
+{
+	global Func_getPositionX
+    return DllCall(Func_getPositionX, "UInt", controller, "Float")
+}
+
+GetPositionY(controller)
+{
+	global Func_getPositionY
+    return DllCall(Func_getPositionY, "UInt", controller, "Float")
+}
+
+GetPositionZ(controller)
+{
+	global Func_getPositionZ
+    return DllCall(Func_getPositionZ, "UInt", controller, "Float")
+}
+
+SetTrackingOrigin(origin)
+{
+	global Func_setTrackingOrigin
+    return DllCall(Func_setTrackingOrigin, "UInt", origin)
 }
 
 ResetFacing(controller)
