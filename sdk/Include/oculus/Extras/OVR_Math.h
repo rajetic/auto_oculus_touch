@@ -10,12 +10,12 @@
 // This file is intended to be independent of the rest of LibOVR and LibOVRKernel and thus
 // has no #include dependencies on either.
 
+#include <float.h>
 #include <math.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <float.h>
 
 #ifndef OVR_EXCLUDE_CAPI_FROM_MATH
 #include "../OVR_CAPI.h" // Required due to a dependence on the ovrFovPort_ declaration.
@@ -4192,10 +4192,24 @@ class Angle {
     res -= x;
     return res;
   }
+  Angle& operator*=(const T& x) {
+    a = a * x;
+    FixRange();
+    return *this;
+  }
+  Angle operator*(const T& x) const {
+    Angle res = *this;
+    res *= x;
+    return res;
+  }
 
   T Distance(const Angle& b) {
     T c = fabs(a - b.a);
     return (c <= ((T)MATH_DOUBLE_PI)) ? c : ((T)MATH_DOUBLE_TWOPI) - c;
+  }
+
+  Angle Lerp(const Angle& b, T f) const {
+    return *this + (b - *this) * f;
   }
 
  private:
@@ -4436,10 +4450,10 @@ struct FovPort {
     FovPort uncantedFov = cantedFov;
 
     // make 3D vectors from the FovPorts projected to z=1 plane
-    Vector3f leftUp = Vector3f(cantedFov.LeftTan, cantedFov.UpTan, 1.0f);
-    Vector3f rightUp = Vector3f(-cantedFov.RightTan, cantedFov.UpTan, 1.0f);
-    Vector3f leftDown = Vector3f(cantedFov.LeftTan, -cantedFov.DownTan, 1.0f);
-    Vector3f rightDown = Vector3f(-cantedFov.RightTan, -cantedFov.DownTan, 1.0f);
+    Vector3f leftUp = Vector3f(cantedFov.LeftTan, -cantedFov.UpTan, 1.0f);
+    Vector3f rightUp = Vector3f(-cantedFov.RightTan, -cantedFov.UpTan, 1.0f);
+    Vector3f leftDown = Vector3f(cantedFov.LeftTan, cantedFov.DownTan, 1.0f);
+    Vector3f rightDown = Vector3f(-cantedFov.RightTan, cantedFov.DownTan, 1.0f);
 
     // rotate these vectors using the canting specified
     leftUp = canting.Rotate(leftUp);
@@ -4458,8 +4472,8 @@ struct FovPort {
     rightDown /= OVRMath_Max(rightDown.z, kMinValidZ);
 
     // generate new FovTans as "bounding box" values
-    uncantedFov.UpTan = OVRMath_Max(leftUp.y, rightUp.y);
-    uncantedFov.DownTan = OVRMath_Max(-leftDown.y, -rightDown.y);
+    uncantedFov.UpTan = OVRMath_Max(-leftUp.y, -rightUp.y);
+    uncantedFov.DownTan = OVRMath_Max(leftDown.y, rightDown.y);
     uncantedFov.LeftTan = OVRMath_Max(leftUp.x, leftDown.x);
     uncantedFov.RightTan = OVRMath_Max(-rightDown.x, -rightUp.x);
 

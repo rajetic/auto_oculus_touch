@@ -7,8 +7,8 @@
 #ifndef OVR_ErrorCode_h
 #define OVR_ErrorCode_h
 
-#include "OVR_Version.h"
 #include <stdint.h>
+#include "OVR_Version.h"
 
 
 
@@ -155,11 +155,17 @@ typedef enum ovrErrorType_ {
   /* Audio error range, reserved for Audio errors. */
   /*************************************************/
 
-  /// Failure to find the specified audio device.
+  /// Failure to find neither audio input or output device.
   ovrError_AudioDeviceNotFound = -2001,
 
   /// Generic COM error.
   ovrError_AudioComError = -2002,
+
+  /// Failure to find the specified audio input device.
+  ovrError_AudioInputDeviceNotFound = -2003,
+
+  /// Failure to find the specified audio output device.
+  ovrError_AudioOutputDeviceNotFound = -2004,
 
   /**************************/
   /* Initialization errors. */
