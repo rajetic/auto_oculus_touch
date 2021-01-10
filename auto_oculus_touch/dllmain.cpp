@@ -37,6 +37,7 @@ ovrVector3f			g_origin = { 0,0,0 };	// Origin of reset tracking coordinate syste
 
 // vJoy
 int				g_vjoy = -1;
+char			g_errorBuffer[1000];
 
 // Functions exported to AutoHotkey
 extern "C"
@@ -105,8 +106,9 @@ extern "C"
 	// Initialise a vJoy device. Currently only a single device can be used by a single auto_oculus_touch script.
 	// device - index from 1 to the number of vJoy devices
 	// return - 0 if init failed, 1 if succeeded
-	__declspec(dllexport) int initvJoy(unsigned int device)
+	__declspec(dllexport) char* initvJoy(unsigned int device)
 	{
+		sprintf_s(g_errorBuffer, "");
 		g_vjoy = -1;
 		if (vJoyEnabled())
 		{
@@ -122,8 +124,24 @@ extern "C"
 					}
 				}
 			}
+			else
+			{
+				
+				sprintf_s(g_errorBuffer, "vJoy version mismatch: DLL=%d SDK=%d", VerDll, VerDrv);
+				//MessageBox(NULL, buf, L"initvJoy", 0);
+				return g_errorBuffer;
+			}
 		}
-		return g_vjoy > -1 ? 1 : 0;
+		if (g_vjoy > -1)
+		{
+			sprintf_s(g_errorBuffer, "");
+			return g_errorBuffer;
+		}
+		else
+		{
+			sprintf_s(g_errorBuffer, "Something went wrong with initvJoy");
+			return g_errorBuffer;
+		}
 	}
 
 	// Set the state of a vJoy axis.
@@ -524,7 +542,7 @@ extern "C"
 
 	__declspec(dllexport) void sendRawMouseButtonDown(unsigned int button)
 	{
-		DWORD buttons[] = { MOUSEEVENTF_LEFTDOWN,MOUSEEVENTF_MIDDLEDOWN,MOUSEEVENTF_RIGHTDOWN };
+		DWORD buttons[] = { MOUSEEVENTF_LEFTDOWN,MOUSEEVENTF_RIGHTDOWN,MOUSEEVENTF_MIDDLEDOWN };
 		if (button < 3)
 		{
 			INPUT mi;
@@ -540,7 +558,7 @@ extern "C"
 	}
 	__declspec(dllexport) void sendRawMouseButtonUp(unsigned int button)
 	{
-		DWORD buttons[] = { MOUSEEVENTF_LEFTUP,MOUSEEVENTF_MIDDLEUP,MOUSEEVENTF_RIGHTUP };
+		DWORD buttons[] = { MOUSEEVENTF_LEFTUP,MOUSEEVENTF_RIGHTUP,MOUSEEVENTF_MIDDLEUP };
 		if (button < 3)
 		{
 			INPUT mi;

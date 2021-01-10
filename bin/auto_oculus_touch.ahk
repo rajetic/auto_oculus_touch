@@ -121,6 +121,9 @@ Func_resetFacing := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "resetFa
 Func_initvJoy := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "initvJoy", "Ptr")
 Func_setvJoyAxis := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setvJoyAxis", "Ptr")
 Func_setvJoyButton := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "setvJoyButton", "Ptr")
+Func_sendRawMouseMove := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "sendRawMouseMove", "Ptr")
+Func_sendRawMouseButtonDown := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "sendRawMouseButtonDown", "Ptr")
+Func_sendRawMouseButtonUp := DllCall("GetProcAddress", "Ptr", AOTModule, "AStr", "sendRawMouseButtonUp", "Ptr")
 
 InitOculus()
 {
@@ -269,7 +272,13 @@ ResetFacing(controller)
 InitvJoy(device)
 {
 	global Func_initvJoy
-	DllCall(Func_initvJoy, "UInt", device, "UInt")
+	result := DllCall(Func_initvJoy, "UInt", device, "AStr")
+	ll := StrLen(result)
+	if ll>0
+	{
+		MsgBox, %result%
+		ExitApp
+	}
 }
 
 SetvJoyAxis(axis, value)
@@ -290,3 +299,20 @@ SetvJoyButton(button, value)
     DllCall(Func_setvJoyButton, "UInt", value, "UInt", button)
 }
 
+SendRawMouseMove(x, y, z)
+{
+	global Func_sendRawMouseMove
+    DllCall(Func_sendRawMouseMove, "Int", x, "Int", y, "Int", z)
+}
+
+SendRawMouseButtonDown(button)
+{
+	global Func_sendRawMouseButtonDown
+    DllCall(Func_sendRawMouseButtonDown, "UInt", button)
+}
+
+SendRawMouseButtonUp(button)
+{
+	global Func_sendRawMouseButtonUp
+    DllCall(Func_sendRawMouseButtonUp, "UInt", button)
+}
