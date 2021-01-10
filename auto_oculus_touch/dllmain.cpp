@@ -13,6 +13,7 @@
 #include "oculus/Extras/OVR_Math.h"
 #include "vjoy/public.h"
 #include "vjoy/vjoyinterface.h"
+#include "kf_time.h"
 
 // Global Variables
 ovrSession			g_HMD = 0;	// The session of the headset
@@ -25,7 +26,9 @@ ovrInputState		g_touchState;
 unsigned char		g_sampleBuffer[2][24];		// Buffer used to hold touch vibration patterns
 unsigned char		g_amplitude[2] = { 0, 0 };		// Current amplitude used to generate touch patterns
 int					g_frequency[2] = { 1, 1 };		// Current frequency used to generate touch patterns
-bool				g_oneShot[2] = { false, false };		// If true, amplitude is reset to 0 after filling the buffer once
+//bool				g_oneShot[2] = { false, false };		// If true, amplitude is reset to 0 after filling the buffer once
+
+double			g_vibrateTime[2] = { 0,0 };
 
 // Angle and position tracking
 ovrTrackingState	g_trackingState;		// Touch and head tracking data
@@ -39,9 +42,14 @@ ovrVector3f			g_origin = { 0,0,0 };	// Origin of reset tracking coordinate syste
 int				g_vjoy = -1;
 char			g_errorBuffer[1000];
 
+kf::Time g_timer;
+long long g_lastTime = 0;
+
 // Functions exported to AutoHotkey
 extern "C"
 {
+	__declspec(dllexport) void applyVibration(unsigned int controller, float frequency, float amplitude, double length);
+
 	// Initialise the Oculus session
 	__declspec(dllexport) int initOculus()
 	{
@@ -82,7 +90,21 @@ extern "C"
 			ovr_GetInputState(g_HMD, ovrControllerType_Active , &g_touchState);
 			g_trackingState = ovr_GetTrackingState(g_HMD, 0, false);
 
-			// Check the left touch vibration queue
+			long long currentTime = g_timer.getTicks();
+			double deltaT = g_timer.ticksToSeconds(currentTime - g_lastTime);
+			for (int controller = 0; controller < 2; ++controller)
+			{
+				if (g_vibrateTime[controller] > 0)
+				{
+					g_vibrateTime[controller] -= deltaT;
+					if (g_vibrateTime[controller] <= 0)
+					{
+						g_amplitude[controller] = 0;
+					}
+				}
+			}
+			g_lastTime = currentTime;
+
 			ovrHapticsPlaybackState state;
 			for (int controller = 0; controller < 2; ++controller)
 			{
@@ -94,10 +116,6 @@ extern "C"
 					haptics.SamplesCount = 24;
 					haptics.Samples = &g_sampleBuffer[controller];
 					ovr_SubmitControllerVibration(g_HMD, (ovrControllerType)((int)ovrControllerType_LTouch + controller), &haptics);
-					if (g_oneShot[controller])
-					{
-						g_amplitude[controller] = 0;
-					}
 				}
 			}
 		}
@@ -175,15 +193,15 @@ extern "C"
 	// controller - 0==left, 1==right
 	// frequency  - vibration at 1==320Hz, 2==160Hz, 3==106.7Hz, 4=80Hz
 	// amplitude  - 0 to 255 is the strength of the vibration
-	// oneShot    - This makes the vibration stop after a short pulse
-	__declspec(dllexport) void setVibration(unsigned int controller, unsigned int frequency, unsigned char amplitude, unsigned int oneShot)
+	// length    - Length in seconds to play the vibration. Set to 0 to be infinite.
+	__declspec(dllexport) void setVibration(unsigned int controller, unsigned int frequency, unsigned char amplitude, float length)
 	{
 		if (g_HMD)
 		{
 			if (controller < 2)
 			{
-				g_oneShot[controller] = oneShot;
 				g_amplitude[controller] = amplitude;
+				g_vibrateTime[controller] = length;
 				if (frequency >= 1 && frequency < 24)
 					g_frequency[controller] = frequency;
 				for (int i = 0; i < 24; ++i)
@@ -193,8 +211,6 @@ extern "C"
 			}
 		}
 	}
-
-
 
 	__declspec(dllexport) float getAxis(unsigned int axis)
 	{
